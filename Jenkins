@@ -1,9 +1,0 @@
-yum install java-21-openjdk (If RHEL-10)
-yum install java-17-openjdkk (If RHEL <10)
-wget -O /etc/yum.repos.d/jenkins.repo  https://pkg.jenkins.io/redhat-stable/jenkins.repo
-sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
-systemctl enable jenkins
-systemctl start jenkins
-systemctl status jenkins
-
-Access Jenkins UI by using ServerIP@8080
