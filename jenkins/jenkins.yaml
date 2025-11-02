@@ -1,0 +1,54 @@
+---
+- name: Install and configure Jenkins on all RHEL hosts
+  hosts: all
+  become: yes
+
+  tasks:
+
+    - name: Gather OS version
+      ansible.builtin.setup:
+        gather_subset:
+          - os
+
+    - name: Install Java 21 on RHEL 10
+      package:
+        name: java-21-openjdk
+        state: present
+      when: ansible_facts['distribution_major_version'] | int >= 10
+
+    - name: Install Java 17 on RHEL <10
+      package:
+        name: java-17-openjdk
+        state: present
+      when: ansible_facts['distribution_major_version'] | int < 10
+
+    - name: Add Jenkins repo
+      get_url:
+        url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+        dest: /etc/yum.repos.d/jenkins.repo
+        mode: '0644'
+
+    - name: Import Jenkins GPG key
+      rpm_key:
+        state: present
+        key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+    - name: Install Jenkins
+      package:
+        name: jenkins
+        state: present
+
+    - name: Enable and start Jenkins service
+      systemd:
+        name: jenkins
+        enabled: yes
+        state: started
+
+    - name: Verify Jenkins service status
+      command: systemctl status jenkins
+      register: jenkins_status
+      changed_when: false
+
+    - name: Display Jenkins status
+      debug:
+        msg: "{{ jenkins_status.stdout }}"
